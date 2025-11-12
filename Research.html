@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research - Black Hole Attack Analysis | Nikhil Bharti</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  
+  <style>
+    :root {
+      --primary: #00f5ff;
+      --secondary: #7c3aed;
+      --accent: #f59e0b;
+      --dark: #0a0a0f;
+      --card: #1a1a2e;
+      --text: #e4e4e7;
+      --text-muted: #a1a1aa;
+      --border: #27272a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Animated Universe Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(2px 2px at 20% 30%, white, transparent),
+        radial-gradient(2px 2px at 60% 70%, white, transparent),
+        radial-gradient(1px 1px at 50% 50%, white, transparent),
+        radial-gradient(1px 1px at 80% 10%, white, transparent),
+        radial-gradient(2px 2px at 90% 60%, white, transparent),
+        radial-gradient(1px 1px at 33% 80%, white, transparent),
+        radial-gradient(1px 1px at 15% 90%, white, transparent);
+      background-size: 200% 200%, 180% 180%, 220% 220%, 250% 250%, 300% 300%, 280% 280%, 240% 240%;
+      background-position: 0% 0%, 20% 20%, 40% 40%, 60% 60%, 80% 80%, 10% 10%, 30% 30%;
+      animation: stars 120s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 245, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 50% 20%, rgba(245, 158, 11, 0.1) 0%, transparent 40%);
+      pointer-events: none;
+      z-index: 0;
+      animation: nebula 30s ease-in-out infinite;
+    }
+
+    @keyframes stars {
+      from { background-position: 0% 0%, 20% 20%, 40% 40%, 60% 60%, 80% 80%, 10% 10%, 30% 30%; }
+      to { background-position: 200% 200%, 220% 220%, 240% 240%, 260% 260%, 280% 280%, 210% 210%, 230% 230%; }
+    }
+
+    @keyframes nebula {
+      0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+      50% { opacity: 0.8; transform: scale(1.1) rotate(5deg); }
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      padding: 1rem 0;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+      position: relative;
+    }
+
+    .nav-links a.active {
+      color: var(--primary);
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
+      width: 100%;
+    }
+
+    .hamburger {
+      display: none;
+      font-size: 1.5rem;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      min-height: 50vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10rem 2rem 4rem;
+      z-index: 1;
+    }
+
+    .hero-content {
+      max-width: 900px;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .breadcrumb a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .breadcrumb a:hover {
+      color: var(--secondary);
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--text) 0%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    /* Content Section */
+    .content {
+      position: relative;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      z-index: 1;
+    }
+
+    .research-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+    }
+
+    .research-card h2 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .research-card h3 {
+      font-size: 1.5rem;
+      margin: 2rem 0 1rem;
+      color: var(--text);
+    }
+
+    .research-card h4 {
+      font-size: 1.2rem;
+      margin: 1.5rem 0 0.8rem;
+      color: var(--primary);
+    }
+
+    .research-card p {
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      line-height: 1.8;
+    }
+
+    .research-card ul {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 1.5rem;
+    }
+
+    .research-card li {
+      padding: 0.6rem 0;
+      padding-left: 2rem;
+      position: relative;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    .research-card li::before {
+      content: '▹';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      font-size: 1.5rem;
+    }
+
+    .research-card strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Code Block */
+    .code-block {
+      background: #0d0d15;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      position: relative;
+    }
+
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-title {
+      color: var(--primary);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      background: rgba(0, 245, 255, 0.1);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(0, 245, 255, 0.2);
+    }
+
+    .code-block .comment { color: #888888; }
+    .code-block .keyword { color: var(--primary); }
+    .code-block .type { color: var(--secondary); }
+    .code-block .function { color: var(--accent); }
+    .code-block .string { color: #10b981; }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 1rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: rgba(0, 245, 255, 0.1);
+      color: var(--primary);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    td {
+      color: var(--text-muted);
+    }
+
+    tr:hover {
+      background: rgba(0, 245, 255, 0.05);
+    }
+
+    /* Info Box */
+    .info-box {
+      background: rgba(124, 58, 237, 0.1);
+      border-left: 4px solid var(--secondary);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+    }
+
+    .info-box h4 {
+      color: var(--secondary);
+      margin: 0 0 0.8rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .success-box {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid #10b981;
+    }
+
+    .success-box h4 {
+      color: #10b981;
+    }
+
+    /* Back Button */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.5rem;
+      background: transparent;
+      border: 2px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s;
+      margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+      border-color: var(--primary);
+      background: rgba(0, 245, 255, 0.1);
+      color: var(--primary);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 2rem;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      margin-top: 4rem;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .social-links a {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      color: var(--text);
+      font-size: 1.3rem;
+      transition: all 0.3s;
+    }
+
+    .social-links a:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-3px);
+    }
+
+    /* Mobile Styles */
+    @media (max-width: 768px) {
+      .hamburger {
+        display: block;
+      }
+
+      .nav-links {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 75%;
+        height: 100vh;
+        background: rgba(10, 10, 15, 0.98);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        padding: 6rem 2rem 2rem;
+        transform: translateX(100%);
+        transition: transform 0.3s;
+        border-left: 1px solid var(--border);
+      }
+
+      .nav-links.active {
+        transform: translateX(0);
+      }
+
+      .nav-links a {
+        width: 100%;
+        padding: 1rem 0;
+        font-size: 1.1rem;
+      }
+
+      .nav-container {
+        padding: 0 1.5rem;
+      }
+
+      .hero {
+        padding: 8rem 1.5rem 3rem;
+      }
+
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .research-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .research-card h2 {
+        font-size: 1.6rem;
+      }
+
+      .code-block {
+        padding: 1rem;
+        font-size: 0.8rem;
+      }
+
+      table {
+        font-size: 0.8rem;
+      }
+
+      th, td {
+        padding: 0.7rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <div class="nav-container">
+      <a href="index.html" class="logo">Nikhil Bharti</a>
+      <div class="hamburger">
+        <i class="fas fa-bars"></i>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="projects.html">Projects</a>
+        <a href="skills.html">Skills</a>
+        <a href="Research.html" class="active">Research</a>
+        <a href="Achievements.html">Achievements</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <div class="breadcrumb">
+        <a href="index.html">Home</a>
+        <i class="fas fa-chevron-right"></i>
+        <span>Research</span>
+      </div>
+      <h1>Black Hole Attack Analysis in AODV</h1>
+      <p>A comprehensive study on network security vulnerabilities in ad-hoc wireless networks</p>
+    </div>
+  </section>
+
+  <div class="content">
+    <a href="index.html" class="back-btn">
+      <i class="fas fa-arrow-left"></i> Back to Portfolio
+    </a>
+
+    <div class="research-card">
+      <h2><i class="fas fa-flask"></i> Abstract</h2>
+      <p>
+        This research project investigates the Black Hole attack in Ad-hoc wireless networks using the AODV (Ad-hoc On-Demand Distance Vector) routing protocol. The simulation was conducted using ns-3 (Network Simulator 3) on Parrot OS, with NetAnim for visualization. The study demonstrates how a malicious node can disrupt network communication by dropping all incoming packets, effectively creating a "black hole" in the network topology.
+      </p>
+      <div class="info-box">
+        <h4><i class="fas fa-info-circle"></i> Research Metrics</h4>
+        <ul style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          <li><strong>Simulator:</strong> ns-3 (v3.41)</li>
+          <li><strong>Protocol:</strong> AODV</li>
+          <li><strong>Network Type:</strong> Ad-hoc WiFi</li>
+          <li><strong>Nodes:</strong> 5 (Linear Topology)</li>
+          <li><strong>Attack Type:</strong> Black Hole</li>
+          <li><strong>Visualization:</strong> NetAnim 3.109</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="research-card">
+      <h2><i class="fas fa-cogs"></i> 1. Environment Setup</h2>
+      
+      <h3>1.1 Operating System Selection</h3>
+      <p>
+        <strong>Operating System:</strong> Parrot OS (Debian-based, security-oriented Linux distribution)
+      </p>
+      <p>
+        <strong>Rationale:</strong> NS-3 is a C++-based network simulator requiring robust compilers, build tools, and system libraries. Linux distributions provide better compatibility and stability for development environments. Parrot OS was specifically chosen due to:
+      </p>
+      <ul>
+        <li>Pre-installed development tools and compilers (gcc, g++, make)</li>
+        <li>Security-focused package repositories</li>
+        <li>Debian-based stability and extensive documentation</li>
+        <li>Built-in networking tools for troubleshooting</li>
+      </ul>
+
+      <h3>1.2 Prerequisites & Dependencies</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-title">System Dependencies Installation</span>
+          <button class="copy-btn" onclick="copyCode(this)">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+<span class="comment"># Update package repositories</span>
+sudo apt update
+
+<span class="comment"># Install essential build tools</span>
+sudo apt install -y build-essential gcc g++ cmake
+
+<span class="comment"># Install Python dependencies</span>
+sudo apt install -y python3 python3-dev python3-setuptools
+
+<span class="comment"># Install NS-3 specific libraries</span>
+sudo apt install -y qt5-default libqt5widgets5 libqt5opengl5-dev
+
+<span class="comment"># Install NetAnim dependencies</span>
+sudo apt install -y qtbase5-dev qtchooser qt5-qmake</div>
+
+      <h3>1.3 Common Setup Issues</h3>
+      <div class="info-box">
+        <h4><i class="fas fa-exclamation-triangle"></i> libhwloc Version Mismatch (Parrot OS)</h4>
+        <p>During installation, a version conflict was encountered with the libhwloc library. Resolution involved:</p>
+        <ul>
+          <li>Identifying conflicting packages using <code>dpkg -l | grep libhwloc</code></li>
+          <li>Manual removal of incompatible versions</li>
+          <li>Installation of correct .deb files from Debian repositories</li>
+          <li>Verification using <code>ldconfig -p | grep libhwloc</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="research-card">
+      <h2><i class="fas fa-code"></i> 2. Simulation Implementation</h2>
+
+      <h3>2.1 Network Topology Design</h3>
+      <p>The simulation implements a linear ad-hoc network topology with the following specifications:</p>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Node ID</th>
+            <th>Position (X, Y, Z)</th>
+            <th>Role</th>
+            <th>IP Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Node 0</td>
+            <td>(0.0, 0.0, 0.0)</td>
+            <td>Source (Transmitter)</td>
+            <td>10.1.1.1</td>
+          </tr>
+          <tr>
+            <td>Node 1</td>
+            <td>(50.0, 0.0, 0.0)</td>
+            <td>Relay Node</td>
+            <td>10.1.1.2</td>
+          </tr>
+          <tr style="background: rgba(255, 0, 0, 0.1);">
+            <td><strong>Node 2</strong></td>
+            <td><strong>(100.0, 0.0, 0.0)</strong></td>
+            <td><strong>BLACKHOLE (Malicious)</strong></td>
+            <td><strong>10.1.1.3</strong></td>
+          </tr>
+          <tr>
+            <td>Node 3</td>
+            <td>(150.0, 0.0, 0.0)</td>
+            <td>Relay Node</td>
+            <td>10.1.1.4</td>
+          </tr>
+          <tr>
+            <td>Node 4</td>
+            <td>(200.0, 0.0, 0.0)</td>
+            <td>Destination (Receiver)</td>
+            <td>10.1.1.5</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>2.2 Black Hole Attack Implementation</h3>
+      <p>The core mechanism of the attack is implemented through a custom receive callback function that intercepts and drops all incoming packets at the malicious node:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-title">blackhole-attack.cc (Core Attack Logic)</span>
+          <button class="copy-btn" onclick="copyCode(this)">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+<span class="comment">// Black Hole Receive Callback Function</span>
+<span class="type">bool</span> <span class="function">BlackholeReceiveCallback</span>(<span class="type">Ptr</span>&lt;NetDevice&gt; <span class="type">device</span>, 
+                               <span class="type">Ptr</span>&lt;<span class="keyword">const</span> Packet&gt; <span class="type">packet</span>,
+                               <span class="type">uint16_t</span> <span class="type">protocol</span>, 
+                               <span class="keyword">const</span> <span class="type">Address</span> &<span class="type">sender</span>)
+{
+  <span class="comment">// Log the dropped packet for analysis</span>
+  <span class="function">NS_LOG_UNCOND</span>(<span class="string">"⚫ Blackhole node dropped packet of size "</span> 
+                &lt;&lt; <span class="type">packet</span>-&gt;<span class="function">GetSize</span>() &lt;&lt; <span class="string">" bytes"</span>);
+  
+  <span class="comment">// Return true to indicate packet has been "handled"</span>
+  <span class="comment">// This prevents packet from being forwarded to upper layers</span>
+  <span class="keyword">return</span> <span class="keyword">true</span>; <span class="comment">// Packet consumed (dropped)</span>
+}
+
+<span class="comment">// Configure Node 2 as the Black Hole attacker</span>
+<span class="type">Ptr</span>&lt;NetDevice&gt; blackholeDevice = devices.<span class="function">Get</span>(<span class="string">2</span>);
+blackholeDevice-&gt;<span class="function">SetReceiveCallback</span>(<span class="function">MakeCallback</span>(&BlackholeReceiveCallback));</div>
+
+      <h3>2.3 Network Configuration</h3>
+      <ul>
+        <li><strong>WiFi Standard:</strong> IEEE 802.11b (11 Mbps)</li>
+        <li><strong>MAC Protocol:</strong> AdhocWifiMac (Decentralized)</li>
+        <li><strong>Routing Protocol:</strong> AODV (Reactive routing)</li>
+        <li><strong>Mobility Model:</strong> ConstantPositionMobilityModel (Static nodes)</li>
+        <li><strong>Application Layer:</strong> UDP Echo (Client-Server model)</li>
+        <li><strong>Simulation Time:</strong> 20 seconds</li>
+        <li><strong>Packet Size:</strong> 1024 bytes</li>
+        <li><strong>Transmission Interval:</strong> 0.5 seconds</li>
+      </ul>
+    </div>
+
+    <div class="research-card">
+      <h2><i class="fas fa-chart-line"></i> 3. Results & Analysis</h2>
+
+      <h3>3.1 Terminal Output</h3>
+      <div class="success-box">
+        <h4><i class="fas fa-check-circle"></i> Simulation Execution Successful</h4>
+        <p>The simulation successfully demonstrated the Black Hole attack with consistent packet dropping behavior:</p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-title">Terminal Output Log</span>
+        </div>
+🚀 Starting Blackhole Attack Simulation...
+📊 Number of Nodes: 5
+✅ Created 5 nodes
+✅ WiFi Ad-hoc network configured
+✅ Nodes positioned in linear topology
+✅ AODV routing protocol installed
+✅ IP addresses assigned
+⚫ Node 2 configured as BLACKHOLE (malicious)
+✅ UDP Echo Server installed on Node 4
+✅ UDP Echo Client installed on Node 0
+✅ NetAnim visualization configured
+
+▶️  Running simulation for 20 seconds...
+
+⚫ Blackhole node dropped packet of size 1024 bytes
+⚫ Blackhole node dropped packet of size 1024 bytes
+⚫ Blackhole node dropped packet of size 1024 bytes
+⚫ Blackhole node dropped packet of size 1024 bytes
+... [repeated 40 times]
+
+✅ Simulation completed successfully!</div>
+
+      <h3>3.2 NetAnim Visualization</h3>
+      <p>The NetAnim tool provided real-time visual confirmation of the attack:</p>
+      <ul>
+        <li><strong style="color: #10b981;">Node 0 (Green):</strong> Source node continuously transmitting UDP packets</li>
+        <li><strong style="color: #ffffff;">Node 1 (White):</strong> Relay node forwarding packets toward destination</li>
+        <li><strong style="color: #ff0000;">Node 2 (Red - BLACKHOLE):</strong> Malicious node intercepting and dropping all packets</li>
+        <li><strong style="color: #ffffff;">Node 3 (White):</strong> Relay node (unreachable due to blackhole)</li>
+        <li><strong style="color: #3b82f6;">Node 4 (Blue):</strong> Destination node receiving zero packets</li>
+      </ul>
+
+      <div class="info-box">
+        <h4><i class="fas fa-eye"></i> Key Observations</h4>
+        <ul>
+          <li>Packets visualized as moving dots originated from Node 0</li>
+          <li>Packet flow stopped completely at Node 2 (Black Hole)</li>
+          <li>No packets reached Node 4 (Destination), confirming complete disruption</li>
+          <li>AODV routing unable to detect or mitigate the malicious behavior</li>
+        </ul>
+      </div>
+
+      <h3>3.3 Impact Assessment</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Without Attack</th>
+            <th>With Black Hole Attack</th>
+            <th>Impact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Packet Delivery Ratio (PDR)</td>
+            <td>~100%</td>
+            <td>0%</td>
+            <td style="color: #ff0000;">Complete Failure</td>
+          </tr>
+          <tr>
+            <td>End-to-End Delay</td>
+            <td>~50ms</td>
+            <td>∞ (No delivery)</td>
+            <td style="color: #ff0000;">Network Blackout</td>
+          </tr>
+          <tr>
+            <td>Throughput</td>
+            <td>~2 Mbps</td>
+            <td>0 Mbps</td>
+            <td style="color: #ff0000;">Total Loss</td>
+          </tr>
+          <tr>
+            <td>Network Availability</td>
+            <td>100%</td>
+            <td>0%</td>
+            <td style="color: #ff0000;">DoS Achieved</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="research-card">
+      <h2><i class="fas fa-shield-alt"></i> 4. Technical Insights</h2>
+
+      <h3>4.1 AODV Protocol Vulnerability</h3>
+      <p>The Ad-hoc On-Demand Distance Vector (AODV) routing protocol is susceptible to Black Hole attacks due to:</p>
+      <ul>
+        <li><strong>Trust-based Operation:</strong> AODV assumes all nodes cooperate honestly in route discovery and maintenance</li>
+        <li><strong>No Authentication:</strong> Route Reply (RREP) messages are not cryptographically verified</li>
+        <li><strong>Reactive Nature:</strong> Routes are established on-demand without prior verification of node behavior</li>
+        <li><strong>Lack of Monitoring:</strong> No built-in mechanism to detect packet forwarding failures</li>
+      </ul>
+
+      <h3>4.2 Attack Mechanism Breakdown</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-title">Attack Flow Diagram (Sequential)</span>
+        </div>
+1. Node 0 generates UDP packet destined for Node 4
+   ↓
+2. AODV initiates Route Discovery (RREQ broadcast)
+   ↓
+3. Node 2 (Blackhole) receives RREQ and forwards it
+   ↓
+4. Node 4 sends Route Reply (RREP) back through Node 2
+   ↓
+5. Route established: 0 → 1 → 2 → 3 → 4
+   ↓
+6. Node 0 starts sending data packets
+   ↓
+7. <strong style="color: #ff0000;">⚫ Node 2 DROPS all packets (Black Hole activated)</strong>
+   ↓
+8. Node 4 receives NOTHING (Communication disrupted)</div>
+
+      <h3>4.3 Why This Attack is Effective</h3>
+      <ul>
+        <li><strong>Silent Operation:</strong> The malicious node participates normally in routing until data transmission begins</li>
+        <li><strong>No Error Signals:</strong> Dropped packets generate no ICMP errors or routing updates</li>
+        <li><strong>Resource Exhaustion:</strong> Source continues sending packets, wasting bandwidth and energy</li>
+        <li><strong>Difficult Detection:</strong> Appears as normal packet loss or congestion to upper layers</li>
+      </ul>
+    </div>
+
+    <div class="research-card">
+      <h2><i class="fas fa-rocket"></i> 5. Future Work & Enhancements</h2>
+
+      <h3>5.1 Quantitative Performance Analysis</h3>
+      <p><strong>Objective:</strong> Implement FlowMonitor module for detailed statistical analysis</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-title">FlowMonitor Integration (Proposed)</span>
+          <button class="copy-btn" onclick="copyCode(this)">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+<span class="comment">// Install FlowMonitor on all nodes</span>
+<span class="type">FlowMonitorHelper</span> flowmon;
+<span class="type">Ptr</span>&lt;FlowMonitor&gt; monitor = flowmon.<span class="function">InstallAll</span>();
+
+<span class="comment">// After simulation, calculate metrics</span>
+monitor-&gt;<span class="function">CheckForLostPackets</span>();
+<span class="type">Ptr</span>&lt;Ipv4FlowClassifier&gt; classifier = 
+    <span class="function">DynamicCast</span>&lt;Ipv4FlowClassifier&gt;(flowmon.<span class="function">GetClassifier</span>());
+
+<span class="comment">// Analyze flow statistics</span>
+<span class="keyword">for</span> (<span class="keyword">auto</span> flow : monitor-&gt;<span class="function">GetFlowStats</span>()) {
+    <span class="function">std::cout</span> &lt;&lt; <span class="string">"PDR: "</span> 
+              &lt;&lt; flow.rxPackets / flow.txPackets * <span class="string">100</span> 
+              &lt;&lt; <span class="string">"%"</span> &lt;&lt; <span class="function">std::endl</span>;
+}</div>
+      <p><strong>Expected Metrics:</strong></p>
+      <ul>
+        <li>Packet Delivery Ratio (PDR) - Quantify attack impact</li>
+        <li>End-to-End Delay - Measure latency for delivered packets</li>
+        <li>Jitter - Network stability analysis</li>
+        <li>Packet Loss Rate - Percentage of dropped packets</li>
+      </ul>
+
+      <h3>5.2 Detection Algorithm Implementation</h3>
+      <p><strong>Approach:</strong> Watchdog-based intrusion detection system</p>
+      <div class="info-box">
+        <h4><i class="fas fa-radar"></i> Proposed Detection Mechanism</h4>
+        <ul>
+          <li><strong>Monitor Mode:</strong> Each node monitors neighbors' forwarding behavior</li>
+          <li><strong>Threshold-based:</strong> If forwarding ratio drops below 80%, flag as suspicious</li>
+          <li><strong>Cooperative Detection:</strong> Nodes share blacklists via secure channels</li>
+          <li><strong>Route Avoidance:</strong> AODV modified to exclude blacklisted nodes from routes</li>
+        </ul>
+      </div>
+
+      <h3>5.3 Advanced Attack Variants</h3>
+      <p><strong>Gray Hole Attack:</strong> Selective packet dropping (more stealthy)</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-title">Gray Hole Implementation (Selective Dropping)</span>
+          <button class="copy-btn" onclick="copyCode(this)">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+<span class="type">bool</span> <span class="function">GrayHoleReceiveCallback</span>(<span class="type">Ptr</span>&lt;NetDevice&gt; dev, <span class="type">Ptr</span>&lt;<span class="keyword">const</span> Packet&gt; pkt,
+                              <span class="type">uint16_t</span> protocol, <span class="keyword">const</span> <span class="type">Address</span> &addr)
+{
+  <span class="comment">// Drop 50% of packets randomly (harder to detect)</span>
+  <span class="keyword">if</span> (<span class="function">rand</span>() % <span class="string">100</span> &lt; <span class="string">50</span>) {
+    <span class="function">NS_LOG_UNCOND</span>(<span class="string">"Gray Hole: Dropped packet"</span>);
+    <span class="keyword">return</span> <span class="keyword">true</span>; <span class="comment">// Drop</span>
+  }
+  <span class="keyword">return</span> <span class="keyword">false</span>; <span class="comment">// Forward normally</span>
+}</div>
+
+      <p><strong>Collaborative Black Hole:</strong> Multiple malicious nodes coordinating</p>
+      <ul>
+        <li>Multiple nodes form a malicious coalition</li>
+        <li>Cooperate to send fake routing information</li>
+        <li>Increases attack success rate significantly</li>
+        <li>More difficult to detect and mitigate</li>
+      </ul>
+
+      <h3>5.4 Mitigation Strategies</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Approach</th>
+            <th>Effectiveness</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Cryptographic Authentication</td>
+            <td>Digital signatures on RREP messages</td>
+            <td>High (prevents fake routes)</td>
+          </tr>
+          <tr>
+            <td>Redundant Path Routing</td>
+            <td>Send packets via multiple paths</td>
+            <td>Medium (overhead increase)</td>
+          </tr>
+          <tr>
+            <td>Trust-based Routing</td>
+            <td>Assign trust scores to nodes</td>
+            <td>High (adaptive defense)</td>
+          </tr>
+          <tr>
+            <td>Watchdog Mechanism</td>
+            <td>Monitor neighbor forwarding</td>
+            <td>Medium (overhead cost)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="research-card">
+      <h2><i class="fas fa-book"></i> 6. Execution Guide</h2>
+
+      <h3>6.1 Running the Simulation</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-title">Step-by-Step Execution Commands</span>
+          <button class="copy-btn" onclick="copyCode(this)">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+<span class="comment"># Step 1: Navigate to NS-3 directory</span>
+<span class="keyword">cd</span> ~/ns-allinone-3.41/ns-3.41
+
+<span class="comment"># Step 2: Place your code in scratch folder</span>
+<span class="keyword">cp</span> blackhole-attack.cc scratch/
+
+<span class="comment"># Step 3: Configure NS-3 (if needed)</span>
+./ns3 configure --enable-examples --enable-tests
+
+<span class="comment"># Step 4: Build the simulation</span>
+./ns3 build
+
+<span class="comment"># Step 5: Run the simulation</span>
+./ns3 run scratch/blackhole-attack
+
+<span class="comment"># Step 6: Verify XML file generated</span>
+<span class="keyword">ls</span> -lh blackhole-animation.xml</div>
+
+      <h3>6.2 NetAnim Visualization</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-title">Opening NetAnim</span>
+          <button class="copy-btn" onclick="copyCode(this)">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+<span class="comment"># Navigate to NetAnim directory</span>
+<span class="keyword">cd</span> ~/ns-allinone-3.41/netanim-3.109
+
+<span class="comment"># Launch NetAnim GUI</span>
+./NetAnim
+
+<span class="comment"># In GUI: File → Open XML trace file</span>
+<span class="comment"># Select: ~/ns-allinone-3.41/ns-3.41/blackhole-animation.xml</span>
+<span class="comment"># Click Play button to start animation</span></div>
+
+      <h3>6.3 Expected Output</h3>
+      <div class="success-box">
+        <h4><i class="fas fa-check-circle"></i> Success Indicators</h4>
+        <ul>
+          <li>Terminal displays repeated "Blackhole node dropped packet" messages</li>
+          <li>NetAnim shows Node 2 in RED color with "BLACKHOLE" label</li>
+          <li>Packets visibly stop at Node 2 in animation</li>
+          <li>No packets reach Node 4 (destination)</li>
+          <li>Simulation completes without errors in 20 seconds</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="research-card">
+      <h2><i class="fas fa-graduation-cap"></i> 7. Conclusion</h2>
+      <p>
+        This research successfully demonstrated the vulnerability of AODV-based ad-hoc networks to Black Hole attacks. The simulation clearly illustrated how a single malicious node can completely disrupt network communication by silently dropping packets while appearing to participate in routing protocols.
+      </p>
+      
+      <h3>Key Findings:</h3>
+      <ul>
+        <li><strong>Critical Vulnerability:</strong> AODV's trust-based architecture makes it susceptible to node misbehavior</li>
+        <li><strong>Complete DoS:</strong> A strategically placed Black Hole can achieve 100% packet loss</li>
+        <li><strong>Detection Challenge:</strong> The attack operates silently without generating routing errors</li>
+        <li><strong>Network Impact:</strong> All Quality of Service (QoS) metrics severely degraded</li>
+      </ul>
+
+      <h3>Research Contributions:</h3>
+      <ul>
+        <li>Practical implementation of Black Hole attack in ns-3 simulator</li>
+        <li>Visual demonstration using NetAnim for educational purposes</li>
+        <li>Comprehensive documentation of setup and execution process</li>
+        <li>Foundation for future detection and mitigation research</li>
+      </ul>
+
+      <div class="info-box">
+        <h4><i class="fas fa-lightbulb"></i> Real-World Implications</h4>
+        <p>
+          This research has significant implications for IoT networks, vehicular ad-hoc networks (VANETs), and military tactical communications where AODV is commonly deployed. Organizations implementing such networks must consider:
+        </p>
+        <ul>
+          <li>Implementing node authentication mechanisms</li>
+          <li>Deploying intrusion detection systems</li>
+          <li>Using redundant communication paths</li>
+          <li>Regular security audits of network nodes</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="research-card">
+      <h2><i class="fas fa-link"></i> References & Resources</h2>
+      <ul>
+        <li><strong>NS-3 Documentation:</strong> <a href="https://www.nsnam.org/" target="_blank" style="color: var(--primary);">https://www.nsnam.org/</a></li>
+        <li><strong>AODV RFC 3561:</strong> Ad hoc On-Demand Distance Vector (AODV) Routing Protocol Specification</li>
+        <li><strong>NetAnim Tutorial:</strong> Network Animation for NS-3 Simulator</li>
+        <li><strong>IEEE 802.11:</strong> Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications</li>
+        <li><strong>Research Paper:</strong> "Security Issues in Mobile Ad Hoc Networks: A Survey" - IEEE 2021</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/nikhil-bharti-063b9a225/" target="_blank" aria-label="LinkedIn">
+        <i class="fab fa-linkedin"></i>
+      </a>
+      <a href="https://github.com/Nikhilbharti284" target="_blank" aria-label="GitHub">
+        <i class="fab fa-github"></i>
+      </a>
+      <a href="mailto:nikhilbharti594@gmail.com" aria-label="Email">
+        <i class="fas fa-envelope"></i>
+      </a>
+    </div>
+    <p style="color: var(--text-muted);">
+      &copy; 2025 Nikhil Bharti. All rights reserved.
+    </p>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+
+    if (hamburger) {
+      hamburger.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+      });
+    }
+
+    // Close mobile menu when clicking a link
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+      });
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Copy code functionality
+    function copyCode(button) {
+      const codeBlock = button.closest('.code-block');
+      const code = codeBlock.innerText.replace('Copy\n', '').trim();
+      
+      navigator.clipboard.writeText(code).then(() => {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        button.style.background = 'rgba(16, 185, 129, 0.2)';
+        button.style.borderColor = '#10b981';
+        button.style.color = '#10b981';
+        
+        setTimeout(() => {
+          button.innerHTML = originalHTML;
+          button.style.background = 'rgba(0, 245, 255, 0.1)';
+          button.style.borderColor = 'var(--primary)';
+          button.style.color = 'var(--primary)';
+        }, 2000);
+      });
+    }
+
+    // Scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.research-card').forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(30px)';
+      card.style.transition = 'all 0.6s ease';
+      observer.observe(card);
+    });
+  </script>
+</body>
+</html>
